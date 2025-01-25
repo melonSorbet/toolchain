@@ -1,20 +1,24 @@
-use clap::Parser;
+mod commands;
+use clap::{Parser, Subcommand};
+use commands::{add, delete, export, import, modify, show};
 
-#[derive(Parser)]
-struct Command{
-    command: String,
-    name: String
+#[derive(Debug, Parser)]
+pub struct Command {
+    #[clap(subcommand)]
+    pub command_type: CommandType,
 }
 
+#[derive(Debug, Subcommand)]
+enum CommandType {
+    Add(add::AddCommand),
+    Delete(delete::DeleteCommand),
+    Export(export::ExportCommand),
+    Import(import::ImportCommand),
+    Modify(modify::ModifyCommand),
+    Show(show::ShowCommand),
+}
 
 // TODO: implement smart and enhancible way to add more commands.
-fn main(){
-
-    // TODO: read in all the arguments. With clap or own implementation.
-    // TODO: take arguments and parse them into the correct command-function
-    let args = Command::parse();
-
-
-    println!("this is the command you want to execute {} ",args.command);
-    println!("this is the name you want the command to have {} ",args.name);
+fn main() {
+    println!("{:?}", Command::parse())
 }
