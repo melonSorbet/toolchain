@@ -6,4 +6,6 @@ pub struct ModifyCommand {
     name: String,
 }
 
-pub fn modify_commands() {}
+pub fn modify_commands() {
+    println!("modify");
+}
