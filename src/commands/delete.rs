@@ -7,4 +7,6 @@ pub struct DeleteCommand {
     multiple_commands: Option<String>,
 }
 
-pub fn delete_command() {}
+pub fn delete_command() {
+    println!("delete");
+}
