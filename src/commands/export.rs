@@ -8,6 +8,6 @@ pub struct ExportCommand{
     class: Option<String>,
 }
 
-pub fn export_commands() {
+pub fn export_commands(command: ExportCommand) {
     println!("export");
 }

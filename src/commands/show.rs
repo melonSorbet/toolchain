@@ -6,6 +6,6 @@ pub struct ShowCommand {
     name: String,
 }
 
-pub fn show_commands() {
+pub fn show_commands(command: ShowCommand) {
     println!("show");
 }

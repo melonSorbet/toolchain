@@ -1,5 +1,5 @@
 mod commands;
-use clap::{arg, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 use commands::{add, delete, export, import, modify, show};
 
 
@@ -10,7 +10,7 @@ pub struct Command {
 }
 
 #[derive(Debug, Subcommand)]
-enum CommandType {
+pub enum CommandType {
     Add(add::AddCommand),
     Delete(delete::DeleteCommand),
     Export(export::ExportCommand),
@@ -23,14 +23,12 @@ enum CommandType {
 fn main() {
     let args = Command::parse();
     println!("{:?}", &args);
-    match &args.command_type {
-        CommandType::Add(add) => add::add_command(args),
-        CommandType::Delete(delete) => delete::delete_command(),
-        CommandType::Export(export) => export::export_commands(),
-        CommandType::Import(import)=> import::import_commands(),
-        CommandType::Modify(modify)=> modify::modify_commands(),
-        CommandType::Show(show)=> show::show_commands(),
-        _ => println!("uncool"),
+    match args.command_type {
+        CommandType::Add(add) => add::add_command(add),
+        CommandType::Delete(delete) => delete::delete_command(delete),
+        CommandType::Export(export) => export::export_commands(export),
+        CommandType::Import(import)=> import::import_commands(import),
+        CommandType::Modify(modify)=> modify::modify_commands(modify),
+        CommandType::Show(show)=> show::show_commands(show),
     }
-
 }
