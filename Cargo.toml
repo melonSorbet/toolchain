@@ -5,6 +5,8 @@ edition = "2018"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-
+diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlite_3_35"] }
+dotenvy = "0.15"
 [profile.dev]
 incremental = true
+
