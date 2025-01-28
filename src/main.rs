@@ -1,8 +1,20 @@
-mod commands;
 use clap::{Parser, Subcommand};
 use commands::{add, delete, export, import, modify, show};
-
-
+mod commands {
+    pub mod add;
+    pub mod delete;
+    pub mod export;
+    pub mod import;
+    pub mod modify;
+    pub mod show;
+}
+mod models {
+    pub mod command;
+    pub mod subcommand;
+}
+mod database{
+    pub mod database;
+}
 #[derive(Debug, Parser)]
 pub struct Command {
     #[clap(subcommand)]
@@ -27,8 +39,8 @@ fn main() {
         CommandType::Add(add) => add::add_command(add),
         CommandType::Delete(delete) => delete::delete_command(delete),
         CommandType::Export(export) => export::export_commands(export),
-        CommandType::Import(import)=> import::import_commands(import),
-        CommandType::Modify(modify)=> modify::modify_commands(modify),
-        CommandType::Show(show)=> show::show_commands(show),
+        CommandType::Import(import) => import::import_commands(import),
+        CommandType::Modify(modify) => modify::modify_commands(modify),
+        CommandType::Show(show) => show::show_commands(show),
     }
 }
