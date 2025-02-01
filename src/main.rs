@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
+use sqlx::Error;
 use commands::{add, delete, export, import, modify, show};
+
 mod commands {
     pub mod add;
     pub mod delete;
@@ -12,8 +14,9 @@ mod models {
     pub mod command;
     pub mod subcommand;
 }
-mod database{
+mod services{
     pub mod database;
+    pub mod hash;
 }
 #[derive(Debug, Parser)]
 pub struct Command {
@@ -31,8 +34,11 @@ pub enum CommandType {
     Show(show::ShowCommand),
 }
 
+
 // TODO: implement smart and enhancible way to add more commands.
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    services::database::migrate_database().await.expect("couldnt lol");
     let args = Command::parse();
     println!("{:?}", &args);
     match args.command_type {
@@ -43,4 +49,5 @@ fn main() {
         CommandType::Modify(modify) => modify::modify_commands(modify),
         CommandType::Show(show) => show::show_commands(show),
     }
+    Ok(())
 }

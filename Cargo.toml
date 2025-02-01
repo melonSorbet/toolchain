@@ -5,8 +5,12 @@ edition = "2018"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-sqlx = { version = "0.6.2", features = ["runtime-tokio-native-tls", "sqlite"] }
-tokio = { version = "1.20.0", features = ["macros"] }
+
+sqlx = { version = "0.8.3", features = ["sqlite", "runtime-tokio-rustls"] }
+tokio = { version = "1", features = ["full"] }
+[dependencies.syn]
+version = "1.0"
+features = ["parsing", "proc-macro"]
 [profile.dev]
 incremental = true
-
+lto = false
