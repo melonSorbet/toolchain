@@ -13,4 +13,3 @@ version = "1.0"
 features = ["parsing", "proc-macro"]
 [profile.dev]
 incremental = true
-lto = false

@@ -1,8 +1,8 @@
 use sqlx::FromRow;
 
 #[derive(Debug, FromRow)]
-struct Subcommand {
-    subcommand_id: i32,
-    command: String,
-    sorting_order: u32,
+pub struct Subcommand {
+    pub subcommand_id: String,
+    pub command: String,
+    pub sorting_order: u32,
 }
