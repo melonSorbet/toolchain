@@ -1,3 +1,7 @@
 target
 .idea
-
+database.db
+database.db
+database.db-shm
+database.db-wal
+migrations/.keep
