@@ -5,7 +5,7 @@ use std::error::Error;
 use sqlx::migrate::MigrateDatabase;
 use crate::models::{command, subcommand};
 
-const DB_URL: &str = "sqlite:/mnt/c/Users/User/RustroverProjects/toolchain/mydb.db";
+const DB_URL: &str = "sqlite:/YOUR/DB/PATH";
 pub async fn migrate_database() -> Result<(SqlitePool), Box<dyn Error>> {
     let pool = SqlitePool::connect(DB_URL)
         .await
@@ -15,13 +15,17 @@ pub async fn migrate_database() -> Result<(SqlitePool), Box<dyn Error>> {
         .run(&pool)
         .await
         .expect("TODO: panic message");
-    Ok((pool))
+    Ok(pool)
 }
 pub async fn create_database(){
-    if !Sqlite::database_exists(crate::DB_URL).await.unwrap_or(false) {
-        println!("it doesnt exists {}", crate::DB_URL);
-        Sqlite::create_database(crate::DB_URL).await.unwrap();
+    if !Sqlite::database_exists(DB_URL).await.unwrap() {
+        println!("the database does not exist {}", DB_URL);
+        Sqlite::create_database(DB_URL).await.expect("could not create database");
     }
+}
+pub async fn connect_database() -> Result<SqlitePool, Box<dyn Error>> {
+    let pool = SqlitePool::connect(DB_URL).await.unwrap();
+    Ok(pool)
 }
 pub async fn add_command(
     pool: &SqlitePool,
