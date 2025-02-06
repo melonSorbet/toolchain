@@ -1,5 +1,5 @@
 CREATE TABLE subcommands(
-    id VARCHAR not null PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     command VARCHAR,
     sorting_order INT,
     command_id VARCHAR,

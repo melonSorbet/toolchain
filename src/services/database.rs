@@ -5,7 +5,7 @@ use std::error::Error;
 use sqlx::migrate::MigrateDatabase;
 use crate::models::{command, subcommand};
 
-const DB_URL: &str = "sqlite:/YOUR/DB/PATH";
+const DB_URL: &str = "sqlite:/home/user/development/personal-projects/toolchain/database.db";
 pub async fn migrate_database() -> Result<(SqlitePool), Box<dyn Error>> {
     let pool = SqlitePool::connect(DB_URL)
         .await
