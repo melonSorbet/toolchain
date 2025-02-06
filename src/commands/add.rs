@@ -35,7 +35,7 @@ pub async fn add(pool: &SqlitePool, command: &AddCommand){
     }).await.expect("Couldnt add command");
 
     services::database::add_subcommand(&pool,command.name.clone(),models::subcommand::Subcommand{
-        subcommand_id: None,
+        id: None,
         command: input,
         sorting_order: 1,
         command_id: command.name.clone(),
@@ -52,7 +52,7 @@ pub async fn add_multiple(pool: &SqlitePool,command: &AddCommand) {
 
     for string in vec_input{
         services::database::add_subcommand(&pool,command.name.clone(),models::subcommand::Subcommand{
-            subcommand_id: None,
+            id: None,
             command: string.clone(),
             sorting_order: index,
             command_id: command.name.clone(),

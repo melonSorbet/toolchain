@@ -48,7 +48,7 @@ pub async fn add_subcommand(
     sqlx::query(
         "INSERT INTO subcommands (id, command, sorting_order, command_id) VALUES ($1,$2,$3,$4)",
     )
-    .bind(&subcommand.subcommand_id)
+    .bind(&subcommand.id)
     .bind(&subcommand.command)
     .bind(&subcommand.sorting_order)
     .bind(&command_id)
@@ -83,10 +83,10 @@ pub async fn delete_command(pool: &SqlitePool, id: String) -> Result<(),Box<dyn 
     Ok(())
 }
 
-pub async fn find_command(pool: &SqlitePool, id: String) -> Result<command::Command, Box<dyn Error>> {
+pub async fn find_command(pool: &SqlitePool, id: &String) -> Result<command::Command, Box<dyn Error>> {
     // Query to get the command by id, deserialized into command::Command
     let command = sqlx::query_as::<_, command::Command>("SELECT * FROM commands WHERE id = $1")
-        .bind(&id)
+        .bind(id)
         .fetch_one(pool)
         .await?;
 
@@ -94,11 +94,13 @@ pub async fn find_command(pool: &SqlitePool, id: String) -> Result<command::Comm
     Ok(command)
 }
 
-/*pub async fn find_all_subcommands(pool: &SqlitePool, id: String) ->Result<(subcommand::Subcommand), Box<dyn Error>>{
-    /*let subcommand: subcommand::Subcommand = sqlx::query("SELECT * FROM subcommands WHERE command_id = $1")
-        .bind(&id)
-        .execute(pool)
-        .await?;
-
-    Ok((subcommand))*/
-}*/
+pub async fn find_all_subcommands(pool: &SqlitePool, id: &String) ->Result<(Vec<subcommand::Subcommand>), Box<dyn Error>>{
+    let subcommands: Vec<subcommand::Subcommand> = sqlx::query_as(
+        "SELECT * FROM subcommands WHERE command_id = $1"
+    )
+        .bind(id)
+        .fetch_all(pool)
+        .await
+        .unwrap(); // Or handle error as needed
+    Ok(subcommands)
+}
