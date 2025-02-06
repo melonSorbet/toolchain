@@ -49,7 +49,7 @@ async fn main() -> Result<(), Error> {
         CommandType::Export(export) => export::export_commands(export),
         CommandType::Import(import) => import::import_commands(import),
         CommandType::Modify(modify) => modify::modify_commands(modify),
-        CommandType::Show(show) => show::show_commands(show),
+        CommandType::Show(show) => show::show_commands(show).await,
     }
     Ok(())
 }
