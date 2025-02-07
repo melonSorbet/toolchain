@@ -57,7 +57,7 @@ pub async fn add_subcommand(
 
     Ok(())
 }
-pub async fn delete_all_subcommands(pool: &SqlitePool, command_id: String) -> Result<(),Box<dyn Error>> {
+pub async fn delete_all_subcommands(pool: &SqlitePool, command_id: &String) -> Result<(),Box<dyn Error>> {
     sqlx::query("DELETE FROM subcommands WHERE command_id = $1")
         .bind(&command_id)
         .execute(pool)
@@ -66,7 +66,7 @@ pub async fn delete_all_subcommands(pool: &SqlitePool, command_id: String) -> Re
     Ok(())
 }
 pub async fn delete_specific_subcommand(pool: &SqlitePool, command_id: String, sorting_index: u32) -> Result<(),Box<dyn Error>> {
-    sqlx::query("DELETE FROM subcommands WHERE command_id = $1 AND sorting_index = $2")
+    sqlx::query("DELETE FROM subcommands WHERE command_id = $1 AND sorting_order = $2")
         .bind(command_id)
         .bind(sorting_index)
         .execute(pool)
@@ -74,7 +74,7 @@ pub async fn delete_specific_subcommand(pool: &SqlitePool, command_id: String, s
 
     Ok(())
 }
-pub async fn delete_command(pool: &SqlitePool, id: String) -> Result<(),Box<dyn Error>> {
+pub async fn delete_command(pool: &SqlitePool, id: &String) -> Result<(),Box<dyn Error>> {
     sqlx::query("DELETE FROM commands WHERE id = $1")
         .bind(&id)
         .execute(pool)
