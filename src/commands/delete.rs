@@ -5,6 +5,8 @@ use crate::services::database;
 #[derive(Debug, Args)]
 pub struct DeleteCommand {
     name: String,
+    #[arg(long = "subcommand", short = 's')]
+    delete_subcommand: bool,
 }
 
 pub async fn delete_command(command: DeleteCommand) {
