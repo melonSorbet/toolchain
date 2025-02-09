@@ -45,7 +45,7 @@ async fn main() -> Result<(), Error> {
     println!("{:?}", &args);
     match args.command_type {
         CommandType::Add(add) => add::add_command(add).await,
-        CommandType::Delete(delete) => delete::delete_command(delete).await,
+        CommandType::Delete(delete) => delete::delete(delete).await,
         CommandType::Export(export) => export::export_commands(export),
         CommandType::Import(import) => import::import_commands(import),
         CommandType::Modify(modify) => modify::modify_commands(modify),

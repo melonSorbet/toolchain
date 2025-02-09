@@ -65,7 +65,7 @@ pub async fn delete_all_subcommands(pool: &SqlitePool, command_id: &String) -> R
 
     Ok(())
 }
-pub async fn delete_specific_subcommand(pool: &SqlitePool, command_id: String, sorting_index: u32) -> Result<(),Box<dyn Error>> {
+pub async fn delete_specific_subcommand(pool: &SqlitePool, command_id: &String, sorting_index: &u32) -> Result<(),Box<dyn Error>> {
     sqlx::query("DELETE FROM subcommands WHERE command_id = $1 AND sorting_order = $2")
         .bind(command_id)
         .bind(sorting_index)
