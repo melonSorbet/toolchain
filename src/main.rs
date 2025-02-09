@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 use sqlx::Error;
 use commands::{add, delete, export, import, modify, show};
+use crate::commands::execute;
 
 mod commands {
     pub mod add;
@@ -9,6 +10,7 @@ mod commands {
     pub mod import;
     pub mod modify;
     pub mod show;
+    pub mod execute;
 }
 mod models {
     pub mod command;
@@ -32,6 +34,7 @@ pub enum CommandType {
     Import(import::ImportCommand),
     Modify(modify::ModifyCommand),
     Show(show::ShowCommand),
+    Execute(execute::ExecuteCommand),
 }
 
 
@@ -50,6 +53,7 @@ async fn main() -> Result<(), Error> {
         CommandType::Import(import) => import::import_commands(import),
         CommandType::Modify(modify) => modify::modify_commands(modify),
         CommandType::Show(show) => show::show_commands(show).await,
+        CommandType::Execute(execute) => execute::execute(execute).await,
     }
     Ok(())
 }
