@@ -18,7 +18,6 @@ mod models {
 }
 mod services{
     pub mod database;
-    pub mod hash;
 }
 #[derive(Debug, Parser)]
 pub struct Command {
@@ -47,7 +46,7 @@ async fn main() -> Result<(), Error> {
     let args = Command::parse();
     println!("{:?}", &args);
     match args.command_type {
-        CommandType::Add(add) => add::add_command(add).await,
+        CommandType::Add(add) => add::add(add).await,
         CommandType::Delete(delete) => delete::delete(delete).await,
         CommandType::Export(export) => export::export_commands(export),
         CommandType::Import(import) => import::import_commands(import),
