@@ -8,6 +8,6 @@ pub struct ExecuteCommand {
     amount: Option<u32>
 }
 
-pub fn execute(execute_command: ExecuteCommand) {
+pub async fn execute(execute_command: ExecuteCommand) {
     println!("this is your command {}", execute_command.name);
 }
