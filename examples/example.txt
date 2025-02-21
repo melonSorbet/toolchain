@@ -1,0 +1,53 @@
+add command:
+description: adds new pipeline with 1 or more commands. Opens prompt for command insertion
+
+tool add -m <pipeline-name>
+
+----------------------------------------------------------------
+
+add subcommand:
+description: adds new command to pipeline
+
+tool add <pipeline-name> -c <command-index>
+
+----------------------------------------------------------------
+
+delete command:
+description: deletes pipeline and all commands 
+
+tool delete <pipeline-name> 
+
+-----------------------------------------------------------------
+
+delete subcommand:
+description: delete subcommand 
+
+tool delete <pipeline-name> -c <command-index>
+
+---------------------------------------------------------------
+
+show pipeline:
+description: Show pipeline and all the commands of the pipeline
+
+tool show <pipeline-name>
+
+----------------------------------------------------------------
+
+show all pipelines:
+description: Show all pipelines
+
+tool show 
+
+-----------------------------------------------------------------
+
+modify a pipeline
+description: change pipelines and their settings. -name -n, -description -d.
+
+tool modify -n -d <pipeline-name> 
+
+-----------------------------------------------------------------
+
+execute command 
+description: execute all commands
+
+tool <pipeline-name>
