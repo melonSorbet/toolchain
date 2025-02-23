@@ -13,6 +13,6 @@ pub async fn show_commands(show_command: ShowCommand) {
 
     println!("command name: [{}], command description: [{}], command class: [{}]", command.id,command.description,command.class);
     for subcommand in subcommands {
-        println!("subcommand index: [{}], subcommand command: [{}], subcommand id: [{:?}], command id: [{}] ",subcommand.sorting_order, subcommand.command, subcommand.id.unwrap(), subcommand.command_id );
+        println!("subcommand index: [{}], subcommand command: [{}], subcommand id: [{:?}], command id: [{}] ",subcommand.sorting_order, subcommand.command, subcommand.id.unwrap(), subcommand.pipeline_id );
     }
 }

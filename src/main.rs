@@ -13,8 +13,8 @@ mod commands {
     pub mod execute;
 }
 mod models {
+    pub mod pipeline;
     pub mod command;
-    pub mod subcommand;
 }
 mod services{
     pub mod database;
