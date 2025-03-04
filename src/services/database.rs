@@ -5,7 +5,7 @@ use std::error::Error;
 use sqlx::migrate::MigrateDatabase;
 use crate::models::{pipeline, command};
 
-const DB_URL: &str = "sqlite:/home/user/development/personal/toolchain/database.db";
+const DB_URL: &str = "sqlite:/home/user/development/toolchain/database.db";
 pub async fn migrate_database() -> Result<(SqlitePool), Box<dyn Error>> {
     let pool = SqlitePool::connect(DB_URL)
         .await
@@ -74,6 +74,7 @@ pub async fn delete_specific_subcommand(pool: &SqlitePool, pipeline_id: &String,
 
     Ok(())
 }
+
 pub async fn delete_command(pool: &SqlitePool, id: &String) -> Result<(),Box<dyn Error>> {
     sqlx::query("DELETE FROM pipelines WHERE id = $1")
         .bind(&id)
@@ -102,5 +103,33 @@ pub async fn find_all_subcommands(pool: &SqlitePool, id: &String) ->Result<Vec<c
         .fetch_all(pool)
         .await
         .unwrap(); // Or handle error as needed
+    Ok(subcommands)
+}
+
+pub async fn modify_subcommand(pool: &SqlitePool,new_command: &String, id: &String, index: u32) ->Result<Vec<command::Command>, Box<dyn Error>>{
+    let subcommands: Vec<command::Command> = sqlx::query_as(
+        "UPDATE commands SET command = $1 WHERE sorting_order = $2 AND id = $3"
+    )
+        
+        .bind(new_command)
+        .bind(index)
+        .bind(id)
+        .fetch_all(pool)
+        .await
+        .unwrap(); 
+    Ok(subcommands)
+}
+
+pub async fn change_subcommand_index(pool: &SqlitePool, id: &String, index: u32, new_index: u32) ->Result<Vec<command::Command>, Box<dyn Error>>{
+    let subcommands: Vec<command::Command> = sqlx::query_as(
+        "UPDATE commands SET sorting_order = $1 WHERE sorting_order = $2 AND id = $3"
+    )
+        
+        .bind(new_index)
+        .bind(index)
+        .bind(id)
+        .fetch_all(pool)
+        .await
+        .unwrap(); 
     Ok(subcommands)
 }
