@@ -1,32 +1,45 @@
 // TODO: add sqlite database connection. Add, delete and update functionalities.
 
-use sqlx::{Sqlite, SqlitePool};
-use std::error::Error;
+use crate::models::{command, pipeline};
 use sqlx::migrate::MigrateDatabase;
-use crate::models::{pipeline, command};
+use sqlx::{Sqlite, SqlitePool};
+use std::env::current_dir;
+use std::error::Error;
 
-const DB_URL: &str = "sqlite:/home/user/development/toolchain/database.db";
+pub fn database_path() -> String {
+    let mut path = current_dir().unwrap();
+    path.push("sqlite.db");
+    return path.to_str().unwrap().to_string();
+}
+
 pub async fn migrate_database() -> Result<(SqlitePool), Box<dyn Error>> {
-    let pool = SqlitePool::connect(DB_URL)
+    let pool = SqlitePool::connect(database_path().as_str())
         .await
-        .expect("whaat");
+        .expect("could not connect to database.");
 
     sqlx::migrate!("./migrations")
         .run(&pool)
         .await
-        .expect("TODO: panic message");
+        .expect("could not migrate database");
     Ok(pool)
 }
-pub async fn create_database(){
-    if !Sqlite::database_exists(DB_URL).await.unwrap() {
-        println!("the database does not exist {}", DB_URL);
-        Sqlite::create_database(DB_URL).await.expect("could not create database");
+
+pub async fn create_database() {
+    let path_to_db = database_path();
+    std::fs::File::create(&path_to_db).expect("could not create database file");
+    if !Sqlite::database_exists(&path_to_db).await.unwrap() {
+        println!("the database does not exist {}", &path_to_db);
+        Sqlite::create_database(&path_to_db)
+            .await
+            .expect("could not create database");
     }
 }
 pub async fn connect_database() -> Result<SqlitePool, Box<dyn Error>> {
-    let pool = SqlitePool::connect(DB_URL).await.unwrap();
+    let path_to_db = database_path();
+    let pool = SqlitePool::connect(&path_to_db).await.unwrap();
     Ok(pool)
 }
+
 pub async fn add_command(
     pool: &SqlitePool,
     command: pipeline::Pipeline,
@@ -57,7 +70,10 @@ pub async fn add_subcommand(
 
     Ok(())
 }
-pub async fn delete_all_subcommands(pool: &SqlitePool, pipeline_id: &String) -> Result<(),Box<dyn Error>> {
+pub async fn delete_all_subcommands(
+    pool: &SqlitePool,
+    pipeline_id: &String,
+) -> Result<(), Box<dyn Error>> {
     sqlx::query("DELETE FROM commands WHERE pipeline_id = $1")
         .bind(&pipeline_id)
         .execute(pool)
@@ -65,7 +81,11 @@ pub async fn delete_all_subcommands(pool: &SqlitePool, pipeline_id: &String) -> 
 
     Ok(())
 }
-pub async fn delete_specific_subcommand(pool: &SqlitePool, pipeline_id: &String, sorting_index: &u32) -> Result<(),Box<dyn Error>> {
+pub async fn delete_specific_subcommand(
+    pool: &SqlitePool,
+    pipeline_id: &String,
+    sorting_index: &u32,
+) -> Result<(), Box<dyn Error>> {
     sqlx::query("DELETE FROM commands WHERE pipeline_id = $1 AND sorting_order = $2")
         .bind(pipeline_id)
         .bind(sorting_index)
@@ -75,7 +95,7 @@ pub async fn delete_specific_subcommand(pool: &SqlitePool, pipeline_id: &String,
     Ok(())
 }
 
-pub async fn delete_command(pool: &SqlitePool, id: &String) -> Result<(),Box<dyn Error>> {
+pub async fn delete_command(pool: &SqlitePool, id: &String) -> Result<(), Box<dyn Error>> {
     sqlx::query("DELETE FROM pipelines WHERE id = $1")
         .bind(&id)
         .execute(pool)
@@ -84,7 +104,10 @@ pub async fn delete_command(pool: &SqlitePool, id: &String) -> Result<(),Box<dyn
     Ok(())
 }
 
-pub async fn find_command(pool: &SqlitePool, id: &String) -> Result<pipeline::Pipeline, Box<dyn Error>> {
+pub async fn find_command(
+    pool: &SqlitePool,
+    id: &String,
+) -> Result<pipeline::Pipeline, Box<dyn Error>> {
     // Query to get the command by id, deserialized into pipeline::Pipeline
     let command = sqlx::query_as::<_, pipeline::Pipeline>("SELECT * FROM pipelines WHERE id = $1")
         .bind(id)
@@ -95,41 +118,50 @@ pub async fn find_command(pool: &SqlitePool, id: &String) -> Result<pipeline::Pi
     Ok(command)
 }
 
-pub async fn find_all_subcommands(pool: &SqlitePool, id: &String) ->Result<Vec<command::Command>, Box<dyn Error>>{
-    let subcommands: Vec<command::Command> = sqlx::query_as(
-        "SELECT * FROM Commands WHERE pipeline_id = $1"
-    )
-        .bind(id)
-        .fetch_all(pool)
-        .await
-        .unwrap(); // Or handle error as needed
+pub async fn find_all_subcommands(
+    pool: &SqlitePool,
+    id: &String,
+) -> Result<Vec<command::Command>, Box<dyn Error>> {
+    let subcommands: Vec<command::Command> =
+        sqlx::query_as("SELECT * FROM Commands WHERE pipeline_id = $1")
+            .bind(id)
+            .fetch_all(pool)
+            .await
+            .unwrap(); // Or handle error as needed
     Ok(subcommands)
 }
 
-pub async fn modify_subcommand(pool: &SqlitePool,new_command: &String, id: &String, index: u32) ->Result<Vec<command::Command>, Box<dyn Error>>{
-    let subcommands: Vec<command::Command> = sqlx::query_as(
-        "UPDATE commands SET command = $1 WHERE sorting_order = $2 AND id = $3"
-    )
-        
-        .bind(new_command)
-        .bind(index)
-        .bind(id)
-        .fetch_all(pool)
-        .await
-        .unwrap(); 
+pub async fn modify_subcommand(
+    pool: &SqlitePool,
+    new_command: &String,
+    id: &String,
+    index: u32,
+) -> Result<Vec<command::Command>, Box<dyn Error>> {
+    let subcommands: Vec<command::Command> =
+        sqlx::query_as("UPDATE commands SET command = $1 WHERE sorting_order = $2 AND id = $3")
+            .bind(new_command)
+            .bind(index)
+            .bind(id)
+            .fetch_all(pool)
+            .await
+            .unwrap();
     Ok(subcommands)
 }
 
-pub async fn change_subcommand_index(pool: &SqlitePool, id: &String, index: u32, new_index: u32) ->Result<Vec<command::Command>, Box<dyn Error>>{
+pub async fn change_subcommand_index(
+    pool: &SqlitePool,
+    id: &String,
+    index: u32,
+    new_index: u32,
+) -> Result<Vec<command::Command>, Box<dyn Error>> {
     let subcommands: Vec<command::Command> = sqlx::query_as(
-        "UPDATE commands SET sorting_order = $1 WHERE sorting_order = $2 AND id = $3"
+        "UPDATE commands SET sorting_order = $1 WHERE sorting_order = $2 AND id = $3",
     )
-        
-        .bind(new_index)
-        .bind(index)
-        .bind(id)
-        .fetch_all(pool)
-        .await
-        .unwrap(); 
+    .bind(new_index)
+    .bind(index)
+    .bind(id)
+    .fetch_all(pool)
+    .await
+    .unwrap();
     Ok(subcommands)
 }
