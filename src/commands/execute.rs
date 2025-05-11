@@ -17,9 +17,19 @@ pub async fn execute(execute_command: ExecuteCommand) {
         .await
         .unwrap();
     let shell = get_current_shell().unwrap();
+    println!("{}", shell);
+
+    //TODO: Add Commandline Parsing as well as input
     for command in commands {
-        let current_command = format!("{} -c {}", shell, command.command);
-        Command::new(current_command).output().expect("");
+        let result = Command::new("bash")
+            .arg("-c")
+            .arg(command.command)
+            .output()
+            .expect("couldnt execute your wanted command");
+
+        let stdout = String::from_utf8_lossy(&result.stdout);
+
+        println!("{}", stdout);
     }
 }
 
