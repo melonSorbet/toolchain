@@ -9,6 +9,7 @@ use std::error::Error;
 pub fn database_path() -> String {
     let mut path = current_dir().unwrap();
     path.push("sqlite.db");
+    println!("this is the database {:?}", path);
     return path.to_str().unwrap().to_string();
 }
 
@@ -26,8 +27,8 @@ pub async fn migrate_database() -> Result<(SqlitePool), Box<dyn Error>> {
 
 pub async fn create_database() {
     let path_to_db = database_path();
-    std::fs::File::create(&path_to_db).expect("could not create database file");
     if !Sqlite::database_exists(&path_to_db).await.unwrap() {
+        std::fs::File::create(&path_to_db).expect("could not create database file");
         println!("the database does not exist {}", &path_to_db);
         Sqlite::create_database(&path_to_db)
             .await
@@ -123,7 +124,7 @@ pub async fn find_all_subcommands(
     id: &String,
 ) -> Result<Vec<command::Command>, Box<dyn Error>> {
     let subcommands: Vec<command::Command> =
-        sqlx::query_as("SELECT * FROM Commands WHERE pipeline_id = $1")
+        sqlx::query_as("SELECT * FROM commands WHERE pipeline_id = $1")
             .bind(id)
             .fetch_all(pool)
             .await
