@@ -11,8 +11,8 @@ pub struct ExecuteCommand {
 }
 
 pub async fn execute(execute_command: ExecuteCommand) {
-    println!("this is your command {}", execute_command.name);
-    let pool = database::connect_database().await.unwrap();
+    let database_path = database::database_path();
+    let pool = database::connect_database(database_path).await.unwrap();
     let commands = database::find_all_subcommands(&pool, &execute_command.name)
         .await
         .unwrap();

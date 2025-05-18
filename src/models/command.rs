@@ -1,6 +1,6 @@
 use sqlx::FromRow;
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow,Clone)]
 pub struct Command {
     pub id: Option<i32>,
     pub command: String,

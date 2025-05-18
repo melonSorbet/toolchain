@@ -2,6 +2,7 @@ use clap::Args;
 use clap::ArgGroup;
 use sqlx::SqlitePool;
 use crate::{models, services};
+use crate::services::database;
 use Vec;
 
 // TODO: function that opens up input and lets you input commands until certain key combination is
@@ -20,8 +21,8 @@ pub struct AddCommand {
 }
 
 pub async fn add(command: AddCommand){
-
-    let pool = services::database::connect_database().await.unwrap();
+    let database_path = database::database_path();
+    let pool = services::database::connect_database(database_path).await.unwrap();
     if command.multiple_commands
     {
         add_multiple(&pool,  &command).await;

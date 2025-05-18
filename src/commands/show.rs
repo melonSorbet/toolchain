@@ -1,5 +1,5 @@
 use clap::Args;
-use crate::services;
+use crate::{services,services::database};
 // TODO: show specific commands definition and subcommands to see what is does
 #[derive(Debug, Args)]
 pub struct ShowCommand {
@@ -7,7 +7,8 @@ pub struct ShowCommand {
 }
 
 pub async fn show_commands(show_command: ShowCommand) {
-    let pool = services::database::connect_database().await.unwrap();
+    let database_path = database::database_path();
+    let pool = services::database::connect_database(database_path).await.unwrap();
     let command = services::database::find_command(&pool, &show_command.name).await.unwrap();
     let subcommands = services::database::find_all_subcommands(&pool, &show_command.name).await.unwrap();
 

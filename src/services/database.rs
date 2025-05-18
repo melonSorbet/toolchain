@@ -13,8 +13,8 @@ pub fn database_path() -> String {
     return path.to_str().unwrap().to_string();
 }
 
-pub async fn migrate_database() -> Result<(SqlitePool), Box<dyn Error>> {
-    let pool = SqlitePool::connect(database_path().as_str())
+pub async fn migrate_database(database_path:String) -> Result<SqlitePool, Box<dyn Error>> {
+    let pool = SqlitePool::connect(database_path.as_str())
         .await
         .expect("could not connect to database.");
 
@@ -25,8 +25,7 @@ pub async fn migrate_database() -> Result<(SqlitePool), Box<dyn Error>> {
     Ok(pool)
 }
 
-pub async fn create_database() {
-    let path_to_db = database_path();
+pub async fn create_database(path_to_db: String) {
     if !Sqlite::database_exists(&path_to_db).await.unwrap() {
         std::fs::File::create(&path_to_db).expect("could not create database file");
         println!("the database does not exist {}", &path_to_db);
@@ -35,10 +34,8 @@ pub async fn create_database() {
             .expect("could not create database");
     }
 }
-pub async fn connect_database() -> Result<SqlitePool, Box<dyn Error>> {
-    let path_to_db = database_path();
-    let pool = SqlitePool::connect(&path_to_db).await.unwrap();
-    Ok(pool)
+pub async fn connect_database(path_to_db: String) -> Result<SqlitePool, Box<dyn Error>> {
+    Ok(SqlitePool::connect(&path_to_db).await.unwrap())
 }
 
 pub async fn add_command(
@@ -114,8 +111,6 @@ pub async fn find_command(
         .bind(id)
         .fetch_one(pool)
         .await?;
-
-    // Return the found command
     Ok(command)
 }
 
@@ -127,8 +122,7 @@ pub async fn find_all_subcommands(
         sqlx::query_as("SELECT * FROM commands WHERE pipeline_id = $1")
             .bind(id)
             .fetch_all(pool)
-            .await
-            .unwrap(); // Or handle error as needed
+            .await?; 
     Ok(subcommands)
 }
 
@@ -144,8 +138,7 @@ pub async fn modify_subcommand(
             .bind(index)
             .bind(id)
             .fetch_all(pool)
-            .await
-            .unwrap();
+            .await?;
     Ok(subcommands)
 }
 
@@ -162,7 +155,6 @@ pub async fn change_subcommand_index(
     .bind(index)
     .bind(id)
     .fetch_all(pool)
-    .await
-    .unwrap();
+    .await?;
     Ok(subcommands)
 }

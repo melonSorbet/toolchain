@@ -17,14 +17,16 @@ pub async fn delete(command: DeleteCommand) {
 }
 
 pub async fn delete_command(command: DeleteCommand) {
-    let pool = database::connect_database().await.unwrap();
+    let database_path = database::database_path();
+    let pool = database::connect_database(database_path).await.unwrap();
     database::delete_all_subcommands(&pool, &command.name).await.unwrap();
     database::delete_command(&pool, &command.name).await.unwrap();
     println!("Command {} deleted.", command.name);
 
 }
 pub async fn delete_subcommand(command: DeleteCommand, subcommand_index: u32) {
-    let pool = database::connect_database().await.unwrap();
+    let database_path = database::database_path();
+    let pool = database::connect_database(database_path).await.unwrap();
     database::delete_specific_subcommand(&pool, &command.name, &subcommand_index).await.expect("Could not delete entry in database");
     println!("Command {} from {} deleted.", subcommand_index,command.name);
 }

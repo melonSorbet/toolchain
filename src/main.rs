@@ -40,8 +40,8 @@ pub enum CommandType {
 // TODO: implement smart and enhancible way to add more commands.
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    services::database::create_database().await;
-    services::database::migrate_database().await.expect("couldnt lol");
+    services::database::create_database(services::database::database_path()).await;
+    services::database::migrate_database(services::database::database_path()).await.expect("couldnt lol");
 
     let args = Command::parse();
     println!("{:?}", &args);
