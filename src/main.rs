@@ -1,22 +1,22 @@
-use clap::{Parser, Subcommand};
-use sqlx::Error;
-use commands::{add, delete, export, import, modify, show};
 use crate::commands::execute;
+use clap::{Parser, Subcommand};
+use commands::{add, delete, export, import, modify, show};
+use sqlx::Error;
 
 mod commands {
     pub mod add;
     pub mod delete;
+    pub mod execute;
     pub mod export;
     pub mod import;
     pub mod modify;
     pub mod show;
-    pub mod execute;
 }
 mod models {
-    pub mod pipeline;
     pub mod command;
+    pub mod pipeline;
 }
-mod services{
+mod services {
     pub mod database;
 }
 #[derive(Debug, Parser)]
@@ -36,12 +36,13 @@ pub enum CommandType {
     Execute(execute::ExecuteCommand),
 }
 
-
 // TODO: implement smart and enhancible way to add more commands.
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     services::database::create_database(services::database::database_path()).await;
-    services::database::migrate_database(services::database::database_path()).await.expect("couldnt lol");
+    services::database::migrate_database(services::database::database_path())
+        .await
+        .expect("couldnt lol");
 
     let args = Command::parse();
     println!("{:?}", &args);

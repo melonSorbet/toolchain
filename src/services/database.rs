@@ -13,7 +13,7 @@ pub fn database_path() -> String {
     return path.to_str().unwrap().to_string();
 }
 
-pub async fn migrate_database(database_path:String) -> Result<SqlitePool, Box<dyn Error>> {
+pub async fn migrate_database(database_path: String) -> Result<SqlitePool, Box<dyn Error>> {
     let pool = SqlitePool::connect(database_path.as_str())
         .await
         .expect("could not connect to database.");
@@ -122,7 +122,7 @@ pub async fn find_all_subcommands(
         sqlx::query_as("SELECT * FROM commands WHERE pipeline_id = $1")
             .bind(id)
             .fetch_all(pool)
-            .await?; 
+            .await?;
     Ok(subcommands)
 }
 

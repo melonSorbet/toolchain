@@ -1,4 +1,4 @@
-use clap::{Args};
+use clap::Args;
 use std::path::PathBuf;
 
 // TODO: import exported Database into your own
