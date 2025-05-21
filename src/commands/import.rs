@@ -8,6 +8,6 @@ pub struct ImportCommand {
     class: Option<String>,
 }
 
-pub fn import_commands(command: ImportCommand) {
+pub fn import_commands(_command: ImportCommand) {
     println!("import");
 }

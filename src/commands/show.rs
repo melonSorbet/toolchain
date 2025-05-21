@@ -11,18 +11,25 @@ pub async fn show_commands(show_command: ShowCommand) {
     let pool = services::database::connect_database(database_path)
         .await
         .unwrap();
-    let command = services::database::find_command(&pool, &show_command.name)
+    let command = services::database::find_pipeline(&pool, &show_command.name)
         .await
         .unwrap();
-    let subcommands = services::database::find_all_subcommands(&pool, &show_command.name)
+    let subcommands = services::database::find_all_commands(&pool, &show_command.name)
         .await
         .unwrap();
 
     println!(
-        "command name: [{}], command description: [{}], command class: [{}]",
+        "command:\n  name: {}\n  description: {}\n  class: {}",
         command.id, command.description, command.class
     );
+    println!("subcommands:");
     for subcommand in subcommands {
-        println!("subcommand index: [{}], subcommand command: [{}], subcommand id: [{:?}], command id: [{}] ",subcommand.sorting_order, subcommand.command, subcommand.id.unwrap(), subcommand.pipeline_id );
+        println!(
+            "  - index: {}\n    command: {}\n    id: {}\n    pipeline_id: {}",
+            subcommand.sorting_order,
+            subcommand.command,
+            subcommand.id.unwrap_or_default(),
+            subcommand.pipeline_id
+        );
     }
 }

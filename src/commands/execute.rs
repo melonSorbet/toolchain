@@ -1,6 +1,5 @@
 use crate::services::database;
-use clap::builder::Str;
-use clap::{Args, Error};
+use clap::Args;
 use procfs::process::Process;
 use std::process::Command;
 // TODO: implement command execution as well as subcommand execution, add how often a command should be played
@@ -13,7 +12,7 @@ pub struct ExecuteCommand {
 pub async fn execute(execute_command: ExecuteCommand) {
     let database_path = database::database_path();
     let pool = database::connect_database(database_path).await.unwrap();
-    let commands = database::find_all_subcommands(&pool, &execute_command.name)
+    let commands = database::find_all_commands(&pool, &execute_command.name)
         .await
         .unwrap();
     let shell = get_current_shell().unwrap();

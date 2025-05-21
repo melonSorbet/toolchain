@@ -1,4 +1,4 @@
-use clap::{Args, Parser};
+use clap::Args;
 use std::path::PathBuf;
 
 // TODO: export commands stored in database into json or other good exportable format
@@ -8,6 +8,6 @@ pub struct ExportCommand {
     class: Option<String>,
 }
 
-pub fn export_commands(command: ExportCommand) {
+pub fn export_commands(_command: ExportCommand) {
     println!("export");
 }

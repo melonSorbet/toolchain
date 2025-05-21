@@ -38,37 +38,37 @@ pub async fn connect_database(path_to_db: String) -> Result<SqlitePool, Box<dyn 
     Ok(SqlitePool::connect(&path_to_db).await.unwrap())
 }
 
-pub async fn add_command(
+pub async fn add_pipeline(
     pool: &SqlitePool,
-    command: pipeline::Pipeline,
+    pipeline: pipeline::Pipeline,
 ) -> Result<(), Box<dyn Error>> {
     sqlx::query("INSERT INTO pipelines (id, description, class) VALUES ($1,$2,$3)")
-        .bind(&command.id)
-        .bind(&command.description)
-        .bind(&command.class)
+        .bind(&pipeline.id)
+        .bind(&pipeline.description)
+        .bind(&pipeline.class)
         .execute(pool)
         .await?;
 
     Ok(())
 }
-pub async fn add_subcommand(
+pub async fn add_command(
     pool: &SqlitePool,
     pipeline_id: String,
-    subcommand: command::Command,
+    command: command::Command,
 ) -> Result<(), Box<dyn Error>> {
     sqlx::query(
         "INSERT INTO commands (id, command, sorting_order, pipeline_id) VALUES ($1,$2,$3,$4)",
     )
-    .bind(&subcommand.id)
-    .bind(&subcommand.command)
-    .bind(&subcommand.sorting_order)
+    .bind(&command.id)
+    .bind(&command.command)
+    .bind(&command.sorting_order)
     .bind(&pipeline_id)
     .execute(pool)
     .await?;
 
     Ok(())
 }
-pub async fn delete_all_subcommands(
+pub async fn delete_all_commands(
     pool: &SqlitePool,
     pipeline_id: &String,
 ) -> Result<(), Box<dyn Error>> {
@@ -79,7 +79,7 @@ pub async fn delete_all_subcommands(
 
     Ok(())
 }
-pub async fn delete_specific_subcommand(
+pub async fn delete_specific_command(
     pool: &SqlitePool,
     pipeline_id: &String,
     sorting_index: &u32,
@@ -102,7 +102,7 @@ pub async fn delete_command(pool: &SqlitePool, id: &String) -> Result<(), Box<dy
     Ok(())
 }
 
-pub async fn find_command(
+pub async fn find_pipeline(
     pool: &SqlitePool,
     id: &String,
 ) -> Result<pipeline::Pipeline, Box<dyn Error>> {
@@ -114,47 +114,49 @@ pub async fn find_command(
     Ok(command)
 }
 
-pub async fn find_all_subcommands(
+pub async fn find_all_commands(
     pool: &SqlitePool,
     id: &String,
 ) -> Result<Vec<command::Command>, Box<dyn Error>> {
-    let subcommands: Vec<command::Command> =
+    let commands: Vec<command::Command> =
         sqlx::query_as("SELECT * FROM commands WHERE pipeline_id = $1")
             .bind(id)
             .fetch_all(pool)
             .await?;
-    Ok(subcommands)
+    Ok(commands)
 }
-
-pub async fn modify_subcommand(
+#[allow(dead_code)]
+pub async fn modify_command(
     pool: &SqlitePool,
     new_command: &String,
     id: &String,
     index: u32,
-) -> Result<Vec<command::Command>, Box<dyn Error>> {
-    let subcommands: Vec<command::Command> =
-        sqlx::query_as("UPDATE commands SET command = $1 WHERE sorting_order = $2 AND id = $3")
-            .bind(new_command)
-            .bind(index)
-            .bind(id)
-            .fetch_all(pool)
-            .await?;
-    Ok(subcommands)
+) -> Result<(), Box<dyn Error>> {
+    sqlx::query("UPDATE commands SET command = $1 WHERE sorting_order = $2 AND pipeline_id = $3")
+        .bind(new_command)
+        .bind(index)
+        .bind(id)
+        .execute(pool)
+        .await
+        .unwrap();
+    Ok(())
 }
-
-pub async fn change_subcommand_index(
+//TODO: Replace this with switch of Sorting Orders
+#[allow(dead_code)]
+pub async fn change_command_index(
     pool: &SqlitePool,
     id: &String,
     index: u32,
     new_index: u32,
-) -> Result<Vec<command::Command>, Box<dyn Error>> {
-    let subcommands: Vec<command::Command> = sqlx::query_as(
-        "UPDATE commands SET sorting_order = $1 WHERE sorting_order = $2 AND id = $3",
+) -> Result<(), Box<dyn Error>> {
+    sqlx::query(
+        "UPDATE commands SET sorting_order = $1 WHERE sorting_order = $2 AND pipeline_id = $3",
     )
     .bind(new_index)
     .bind(index)
     .bind(id)
-    .fetch_all(pool)
-    .await?;
-    Ok(subcommands)
+    .execute(pool)
+    .await
+    .unwrap();
+    Ok(())
 }

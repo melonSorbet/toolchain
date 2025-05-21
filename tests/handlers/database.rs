@@ -2,10 +2,8 @@
 mod tests {
 
     use sqlx::Row;
-    use sqlx::{sqlite::SqliteConnectOptions, SqlitePool};
-    use std::str::FromStr;
-    use toolchain::models;
     use toolchain::services::database;
+    use toolchain::{models, services};
 
     #[tokio::test]
     async fn test_database_tables() -> Result<(), Box<dyn std::error::Error>> {
@@ -102,7 +100,7 @@ mod tests {
         Ok(())
     }
     #[tokio::test]
-    async fn add_into_database() -> Result<(), Box<dyn std::error::Error>> {
+    async fn add_pipelines_into_database() -> Result<(), Box<dyn std::error::Error>> {
         let test_db_url = "sqlite::memory:?cache=shared";
 
         // Test database creation
@@ -115,7 +113,7 @@ mod tests {
             class: "test_class".to_string(),
         };
 
-        database::add_command(&pool, pipeline.clone())
+        database::add_pipeline(&pool, pipeline.clone())
             .await
             .unwrap();
         // Verify with raw query
@@ -132,7 +130,7 @@ mod tests {
         Ok(())
     }
     #[tokio::test]
-    async fn find_from_database() -> Result<(), Box<dyn std::error::Error>> {
+    async fn find_pipeline_from_database() -> Result<(), Box<dyn std::error::Error>> {
         let test_db_url = "sqlite::memory:?cache=shared";
 
         // Test database creation
@@ -145,11 +143,11 @@ mod tests {
             class: "test_class".to_string(),
         };
 
-        database::add_command(&pool, pipeline.clone())
+        database::add_pipeline(&pool, pipeline.clone())
             .await
             .unwrap();
         // Verify with raw query
-        let result = database::find_command(&pool, &"test".to_string())
+        let result = database::find_pipeline(&pool, &"test".to_string())
             .await
             .unwrap();
 
@@ -159,7 +157,7 @@ mod tests {
         Ok(())
     }
     #[tokio::test]
-    async fn delete_from_database() -> Result<(), Box<dyn std::error::Error>> {
+    async fn delete_pipeline_from_database() -> Result<(), Box<dyn std::error::Error>> {
         let test_db_url = "sqlite::memory:?cache=shared";
 
         // Test database creation
@@ -172,7 +170,7 @@ mod tests {
             class: "test_class".to_string(),
         };
 
-        database::add_command(&pool, pipeline.clone())
+        database::add_pipeline(&pool, pipeline.clone())
             .await
             .unwrap();
         // Verify with raw query
@@ -187,6 +185,264 @@ mod tests {
             .fetch_one(&pool)
             .await;
         assert!(result.is_err());
+        Ok(())
+    }
+    #[tokio::test]
+    async fn add_command_to_database() -> Result<(), Box<dyn std::error::Error>> {
+        let test_db_url = "sqlite::memory:?cache=shared";
+
+        // Test database creation
+        let pool = database::migrate_database(test_db_url.to_string())
+            .await
+            .unwrap();
+        let pipeline: models::pipeline::Pipeline = models::pipeline::Pipeline {
+            id: "test".to_string(),
+            description: "test_description".to_string(),
+            class: "test_class".to_string(),
+        };
+
+        database::add_pipeline(&pool, pipeline.clone())
+            .await
+            .unwrap();
+        let command = models::command::Command {
+            id: None,
+            command: "ls".to_string(),
+            sorting_order: 1,
+            pipeline_id: "test".to_string(),
+        };
+
+        database::add_command(&pool, "test".to_string(), command.clone())
+            .await
+            .unwrap();
+
+        let result: models::command::Command = sqlx::query_as::<_, models::command::Command>(
+            "SELECT id, command, sorting_order, pipeline_id FROM commands WHERE pipeline_id = ?",
+        )
+        .bind("test")
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+        assert_eq!(result.command, "ls");
+        assert_eq!(result.sorting_order, 1);
+        Ok(())
+    }
+    #[tokio::test]
+    async fn find_all_commands() -> Result<(), Box<dyn std::error::Error>> {
+        let test_db_url = "sqlite::memory:?cache=shared";
+
+        // Test database creation
+        let pool = database::migrate_database(test_db_url.to_string())
+            .await
+            .unwrap();
+        let pipeline: models::pipeline::Pipeline = models::pipeline::Pipeline {
+            id: "test".to_string(),
+            description: "test_description".to_string(),
+            class: "test_class".to_string(),
+        };
+
+        services::database::add_pipeline(&pool, pipeline)
+            .await
+            .unwrap();
+        database::add_command(
+            &pool,
+            "test".to_string(),
+            models::command::Command {
+                id: None,
+                command: "ls".to_string(),
+                sorting_order: 1,
+                pipeline_id: "test".to_string(),
+            },
+        )
+        .await
+        .unwrap();
+        database::add_command(
+            &pool,
+            "test".to_string(),
+            models::command::Command {
+                id: None,
+                command: "mvn".to_string(),
+                sorting_order: 2,
+                pipeline_id: "test".to_string(),
+            },
+        )
+        .await
+        .unwrap();
+        let commands = database::find_all_commands(&pool, &"test".to_string())
+            .await
+            .unwrap();
+
+        assert_eq!(commands[0].command, "ls");
+        assert_eq!(commands[1].command, "mvn");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn delete_all_commands() -> Result<(), Box<dyn std::error::Error>> {
+        let test_db_url = "sqlite::memory:?cache=shared";
+
+        // Test database creation
+        let pool = database::migrate_database(test_db_url.to_string())
+            .await
+            .unwrap();
+        let pipeline: models::pipeline::Pipeline = models::pipeline::Pipeline {
+            id: "test".to_string(),
+            description: "test_description".to_string(),
+            class: "test_class".to_string(),
+        };
+        services::database::add_pipeline(&pool, pipeline)
+            .await
+            .unwrap();
+
+        database::add_command(
+            &pool,
+            "test".to_string(),
+            models::command::Command {
+                id: None,
+                command: "ls".to_string(),
+                sorting_order: 1,
+                pipeline_id: "test".to_string(),
+            },
+        )
+        .await
+        .unwrap();
+        database::add_command(
+            &pool,
+            "test".to_string(),
+            models::command::Command {
+                id: None,
+                command: "mvn".to_string(),
+                sorting_order: 2,
+                pipeline_id: "test".to_string(),
+            },
+        )
+        .await
+        .unwrap();
+        let commands = database::find_all_commands(&pool, &"test".to_string())
+            .await
+            .unwrap();
+
+        assert_eq!(commands.len(), 2);
+        database::delete_all_commands(&pool, &"test".to_string())
+            .await
+            .unwrap();
+        let commands = database::find_all_commands(&pool, &"test".to_string())
+            .await
+            .unwrap();
+
+        assert_eq!(commands.len(), 0);
+        Ok(())
+    }
+    #[tokio::test]
+    async fn modify_command() -> Result<(), Box<dyn std::error::Error>> {
+        let test_db_url = "sqlite::memory:?cache=shared";
+
+        // Test database creation
+        let pool = database::migrate_database(test_db_url.to_string())
+            .await
+            .unwrap();
+        let pipeline: models::pipeline::Pipeline = models::pipeline::Pipeline {
+            id: "test".to_string(),
+            description: "test_description".to_string(),
+            class: "test_class".to_string(),
+        };
+        services::database::add_pipeline(&pool, pipeline)
+            .await
+            .unwrap();
+
+        database::add_command(
+            &pool,
+            "test".to_string(),
+            models::command::Command {
+                id: None,
+                command: "ls".to_string(),
+                sorting_order: 1,
+                pipeline_id: "test".to_string(),
+            },
+        )
+        .await
+        .unwrap();
+        database::add_command(
+            &pool,
+            "test".to_string(),
+            models::command::Command {
+                id: None,
+                command: "mvn".to_string(),
+                sorting_order: 2,
+                pipeline_id: "test".to_string(),
+            },
+        )
+        .await
+        .unwrap();
+        let commands = database::find_all_commands(&pool, &"test".to_string())
+            .await
+            .unwrap();
+        assert_eq!(commands[1].command, "mvn");
+
+        database::modify_command(&pool, &"ripgrep".to_string(), &"test".to_string(), 2)
+            .await
+            .unwrap();
+
+        let commands = database::find_all_commands(&pool, &"test".to_string())
+            .await
+            .unwrap();
+        assert_eq!(commands[1].command, "ripgrep");
+        Ok(())
+    }
+    #[tokio::test]
+    async fn modify_command_sorting_index() -> Result<(), Box<dyn std::error::Error>> {
+        let test_db_url = "sqlite::memory:?cache=shared";
+
+        // Test database creation
+        let pool = database::migrate_database(test_db_url.to_string())
+            .await
+            .unwrap();
+        let pipeline: models::pipeline::Pipeline = models::pipeline::Pipeline {
+            id: "test".to_string(),
+            description: "test_description".to_string(),
+            class: "test_class".to_string(),
+        };
+        services::database::add_pipeline(&pool, pipeline)
+            .await
+            .unwrap();
+
+        database::add_command(
+            &pool,
+            "test".to_string(),
+            models::command::Command {
+                id: None,
+                command: "ls".to_string(),
+                sorting_order: 1,
+                pipeline_id: "test".to_string(),
+            },
+        )
+        .await
+        .unwrap();
+        database::add_command(
+            &pool,
+            "test".to_string(),
+            models::command::Command {
+                id: None,
+                command: "mvn".to_string(),
+                sorting_order: 2,
+                pipeline_id: "test".to_string(),
+            },
+        )
+        .await
+        .unwrap();
+        let commands = database::find_all_commands(&pool, &"test".to_string())
+            .await
+            .unwrap();
+
+        assert_eq!(commands[1].sorting_order, 2);
+
+        database::change_command_index(&pool, &"test".to_string(), 2, 3)
+            .await
+            .unwrap();
+        let commands = database::find_all_commands(&pool, &"test".to_string())
+            .await
+            .unwrap();
+
+        assert_eq!(commands[1].sorting_order, 3);
         Ok(())
     }
 }

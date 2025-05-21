@@ -40,7 +40,7 @@ pub async fn add(command: AddCommand) {
 pub async fn add_subcommand(pool: &SqlitePool, command: &AddCommand) {
     let input = open_input();
     let subcommands: Vec<models::command::Command> =
-        services::database::find_all_subcommands(pool, &command.name)
+        services::database::find_all_commands(pool, &command.name)
             .await
             .unwrap();
 
@@ -52,7 +52,7 @@ pub async fn add_subcommand(pool: &SqlitePool, command: &AddCommand) {
     }
     println!("highest sorting order: {}", highest_index);
 
-    services::database::add_subcommand(
+    services::database::add_command(
         &pool,
         command.name.clone(),
         models::command::Command {
@@ -67,7 +67,7 @@ pub async fn add_subcommand(pool: &SqlitePool, command: &AddCommand) {
 }
 pub async fn add_command(pool: &SqlitePool, command: &AddCommand) {
     let input = open_input();
-    services::database::add_command(
+    services::database::add_pipeline(
         &pool,
         models::pipeline::Pipeline {
             id: command.name.clone(),
@@ -78,7 +78,7 @@ pub async fn add_command(pool: &SqlitePool, command: &AddCommand) {
     .await
     .expect("Couldnt add command");
 
-    services::database::add_subcommand(
+    services::database::add_command(
         &pool,
         command.name.clone(),
         models::command::Command {
@@ -94,7 +94,7 @@ pub async fn add_command(pool: &SqlitePool, command: &AddCommand) {
 
 pub async fn add_multiple(pool: &SqlitePool, command: &AddCommand) {
     let vec_input = open_continuous_input();
-    services::database::add_command(
+    services::database::add_pipeline(
         &pool,
         models::pipeline::Pipeline {
             id: command.name.clone(),
@@ -107,7 +107,7 @@ pub async fn add_multiple(pool: &SqlitePool, command: &AddCommand) {
     let mut index = 1;
 
     for string in vec_input {
-        services::database::add_subcommand(
+        services::database::add_command(
             &pool,
             command.name.clone(),
             models::command::Command {
