@@ -38,3 +38,24 @@ jobs:
           RUSTTARGET: ${{ matrix.target }}
           TOOLCHAIN_VERSION: stable
           EXTRA_FILES: "README.md LICENSE"
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v1.0.0
+          release_name: v1.0.0 – Initial Prerelease
+          draft: false
+          prerelease: true
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/x86_64-unknown-linux-musl/release/your_binary_name
+          asset_name: your_binary_name
+          asset_content_type: application/octet-stream
